@@ -72,4 +72,7 @@ module Classifier =
         let classifier = classify groups tokenizer
         classifier
 
-
+    let vocabulary (tokenizer:Tokenizer) (corpus:string seq) =
+        corpus
+        |> Seq.map tokenizer
+        |> Set.unionMany
