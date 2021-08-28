@@ -19,4 +19,5 @@ The R NuGet package is .NET Framework. I could not find a way to get it to work 
 
 *Aside: I went through chapter 3 samples back in 2015 (with .NET Framework) and was able to get the RProvider visualizer and map to work just fine.*
 
-
+**Chapter 4**  
+The FSharp.Charting NuGet package is .NET Framework. Unfortunately, I am abandoning further exploration on this path since FSharp.Charting is used in subsequent chapters.
