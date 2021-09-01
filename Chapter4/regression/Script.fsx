@@ -87,3 +87,64 @@ let errorEval =
     |> Seq.map (model >> overallCost)
 
 errorEval
+
+let batchUpdate rate (theta0, theta1) (data:Obs seq) =
+    let updates =
+        data
+        |> Seq.map (update rate (theta0, theta1))
+    let theta0' = updates |> Seq.averageBy fst
+    let theta1' = updates |> Seq.averageBy snd
+    theta0', theta1'
+
+let batch rate iters =
+    let rec search (t0,t1) i =
+        if i = 0 then (t0,t1)
+        else
+            search (batchUpdate rate (t0,t1) data) (i-1)
+    search (0.,0.) iters    
+
+let batchedError rate =
+    Seq.unfold (fun (t0,t1) ->
+        let (t0',t1') = batchUpdate rate (t0,t1) data
+        let err = model (t0,t1) |> overallCost
+        Some(err, (t0',t1'))) (0.,0.)
+    |> Seq.take 100
+    |> Seq.toList
+
+batchedError 0.000001
+
+
+#r @"mathnet.numerics\4.15.0\lib\netstandard2.0\MathNet.Numerics.dll"
+#r @"mathnet.numerics.fsharp\4.15.0\lib\netstandard2.0\MathNet.Numerics.FSharp.dll"
+
+open MathNet
+open MathNet.Numerics.LinearAlgebra
+open MathNet.Numerics.LinearAlgebra.Double
+
+// let A = vector [ 1.; 2.; 3. ]
+// let B = matrix [ [ 1.; 2. ]
+//                  [ 3.; 4. ]
+//                  [ 5.; 6. ] ]
+
+//  let C = A * A
+//  let D = A * B
+//  let E = A * B.Column(1)
+ 
+
+type Vec = Vector<float>
+type Mat = Matrix<float>
+
+let cost1 (theta:Vec) (Y:Vec) (X:Mat) =
+    let ps = Y - (theta * X.Transpose())
+    ps * ps |> sqrt
+
+let predict (theta:Vec) (v:Vec) = theta * v
+
+let X = matrix [ for obs in data -> [ 1.; float obs.Instant ]]
+let Y = vector [ for obs in data -> float obs.Cnt ]
+
+let theta = vector [6000.; -4.5]
+
+predict theta (X.Row(0))
+cost1 theta Y X
+
